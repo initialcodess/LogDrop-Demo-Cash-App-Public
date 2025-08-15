@@ -1,0 +1,15 @@
+{
+  "originHash" : "a69a483f4b31f892f2543ecf967d7ca68798afb518ad46553f32721499edcb73",
+  "pins" : [
+    {
+      "identity" : "logdrop-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/initialcodess/LogDrop-iOS",
+      "state" : {
+        "revision" : "03807ba248871fea467e8d383137c53fae3e73a9",
+        "version" : "1.0.1-beta1"
+      }
+    }
+  ],
+  "version" : 3
+}
