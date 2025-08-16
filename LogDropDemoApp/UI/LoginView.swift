@@ -46,7 +46,7 @@ struct LoginView: View {
                         LogDropLogger.shared.logInfo("Username updated: \(newValue)", logFlow: loginFlow)
                     }
 
-                SecureField("PIN Code", text: $pinCode)
+                SecureField("PIN Code (1234)", text: $pinCode)
                     .keyboardType(.numberPad)
                     .padding()
                     .background(Color(.systemGray6))

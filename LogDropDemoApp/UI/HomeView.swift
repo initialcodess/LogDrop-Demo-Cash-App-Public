@@ -166,7 +166,7 @@ struct HomeView: View {
                 Label("Home", systemImage: "house.fill")
             }
 
-            Text("Payments Screen")
+            PaymentsView()
                 .onAppear {
                     LogDropLogger.shared.logDebug("Payments screen opened")
                 }
