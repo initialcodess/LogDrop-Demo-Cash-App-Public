@@ -10,6 +10,8 @@ import SwiftUI
 import LogDropSDK
 
 struct HomeView: View {
+    @EnvironmentObject var session: SessionManager
+
     var body: some View {
         TabView {
             VStack(spacing: 0) {
@@ -174,13 +176,13 @@ struct HomeView: View {
                     Label("Payments", systemImage: "arrow.right.arrow.left")
                 }
 
-            Text("Exit Screen")
-                .onAppear {
-                    LogDropLogger.shared.logWarning("Exit screen opened")
-                }
-                .tabItem {
-                    Label("Exit", systemImage: "questionmark.circle")
-                }
+            Button("Exit") {
+                LogDropLogger.shared.logWarning("Exit tapped, logging out")
+                session.isLoggedIn = false
+            }
+            .tabItem {
+                Label("Exit", systemImage: "questionmark.circle")
+            }
         }
     }
     
