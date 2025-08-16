@@ -12,6 +12,7 @@ import LogDropSDK
 private let kUsernameKey = "cachedUsername"
 
 struct LoginView: View {
+    @EnvironmentObject var session: SessionManager
     @State private var userName = ""
     @State private var pinCode = ""
     @State private var showError = false
@@ -78,7 +79,6 @@ struct LoginView: View {
         .onAppear {
             LogDropLogger.shared.logInfo("Login screen opened")
 
-            // Load cached username if available
             if let saved: String = CacheManager.shared.get(forKey: kUsernameKey, type: String.self) {
                 userName = saved
                 LogDropLogger.shared.logInfo("Loaded saved username: \(saved)", logFlow: loginFlow)
@@ -91,11 +91,20 @@ struct LoginView: View {
 
         if pinCode == DummyData.pinCode {
             showError = false
-            CacheManager.shared.set(userName, forKey: kUsernameKey)
-            LogDrop.updateUser(userUuid: userName)
-            LogDropLogger.shared.logInfo("Sign in successful for username: \(userName)", logFlow: loginFlow)
-            // Navigate to next screen
-        } else {
+
+            let cachedUser: String? = CacheManager.shared.get(forKey: kUsernameKey, type: String.self)
+
+            if cachedUser != userName {
+                CacheManager.shared.set(userName, forKey: kUsernameKey)
+                LogDrop.updateUser(userUuid: userName)
+                LogDropLogger.shared.logInfo("Sign in successful for username: \(userName)", logFlow: loginFlow)
+            } else {
+                LogDropLogger.shared.logInfo("Sign in successful (cached user reused): \(userName)", logFlow: loginFlow)
+            }
+
+            session.isLoggedIn = true
+        }
+        else {
             showError = true
             LogDropLogger.shared.logWarning("Sign in failed for username: \(userName)", logFlow: loginFlow)
         }
@@ -103,5 +112,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView()
+    LoginView().environmentObject(SessionManager())
 }
