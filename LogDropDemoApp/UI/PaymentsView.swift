@@ -88,15 +88,16 @@ struct PaymentsView: View {
                 .padding(.horizontal)
                 
                 VStack(spacing: 0) {
-                    PaymentActionRow(
-                        icon: "arrow.up.right.circle.fill",
-                        title: "Send Funds",
-                        subtitle: "Via transfer or payment link",
-                        color: .green
-                    )
-                    .onTapGesture {
+                    Button(action: {
                         LogDropLogger.shared.logInfo("Send Funds tapped")
                         showSheet = true
+                    }) {
+                        PaymentActionRow(
+                            icon: "arrow.up.right.circle.fill",
+                            title: "Send Funds",
+                            subtitle: "Via transfer or payment link",
+                            color: .green
+                        )
                     }
                     .sheet(isPresented: $showSheet) {
                         VStack(alignment: .leading, spacing: 20) {
@@ -167,21 +168,21 @@ struct PaymentsView: View {
 
                     Divider()
 
-                    PaymentActionRow(
-                        icon: "arrow.down.left.circle.fill",
-                        title: "Receive Funds",
-                        subtitle: "Request a payment from others",
-                        color: .blue
-                    )
-                    .onTapGesture {
+                    Button(action: {
                         LogDropLogger.shared.logError("Receive Funds request failed: No valid account linked")
+                    }) {
+                        PaymentActionRow(
+                            icon: "arrow.down.left.circle.fill",
+                            title: "Receive Funds",
+                            subtitle: "Request a payment from others",
+                            color: .blue
+                        )
                     }
                 }
                 .background(Color.white)
                 .cornerRadius(12)
                 .shadow(radius: 1)
                 .padding(.horizontal)
-
                 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Pay Fast")
