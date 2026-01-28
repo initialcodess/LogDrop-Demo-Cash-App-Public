@@ -11,13 +11,32 @@ import LogDropSDK
 
 @main
 struct LogDropDemoAppApp: App {
-    init() {
+    @StateObject private var session = SessionManager()
 
+    init() {
+        let config = LogDropConfig.Builder()
+            .setBaseUrl("")
+            .setApiKey("")
+            .setLoggingEnabled(true)
+            .setCrashTrackingEnabled(true)
+            .setSensitiveInfoFilter(sensitiveInfoFilter: [
+                try! NSRegularExpression(pattern: "^cardNo:\\s(?:\\d{4}[-\\s]?){3}\\d{4}$"),
+                try! NSRegularExpression(pattern: "password=[^&\\s]+")
+            ])
+            .build()
+
+        LogDrop.initialize(with: config)
     }
     
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            if session.isLoggedIn {
+                HomeView()
+                    .environmentObject(session)
+            } else {
+                LoginView()
+                    .environmentObject(session)
+            }
         }
     }
 }
