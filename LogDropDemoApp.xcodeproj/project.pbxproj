@@ -15,9 +15,22 @@
 		CA2BA75D2E4F36C5006C8DBB /* LogDropDemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LogDropDemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CA5C65542F310ADE00D4FE15 /* Exceptions for "LogDropDemoApp" folder in "LogDropDemoApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CA2BA75C2E4F36C5006C8DBB /* LogDropDemoApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CA2BA75F2E4F36C5006C8DBB /* LogDropDemoApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CA5C65542F310ADE00D4FE15 /* Exceptions for "LogDropDemoApp" folder in "LogDropDemoApp" target */,
+			);
 			path = LogDropDemoApp;
 			sourceTree = "<group>";
 		};
@@ -296,6 +309,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LogDropDemoApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -331,6 +345,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LogDropDemoApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
