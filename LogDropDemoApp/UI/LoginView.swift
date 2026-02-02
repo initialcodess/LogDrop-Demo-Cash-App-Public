@@ -8,109 +8,153 @@
 
 import SwiftUI
 import LogDropSDK
+import FirebaseAnalytics
 
 private let kUsernameKey = "cachedUsername"
 
 struct LoginView: View {
-    @EnvironmentObject var session: SessionManager
+    @EnvironmentObject var authManager: AuthManager
     @State private var userName = ""
     @State private var pinCode = ""
-    @State private var showError = false
-
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    
+    private let authService = AuthService()
+    
     private let loginFlow = LogFlow(
         name: "LoginFlow",
         id: UUID().uuidString,
         customAttributes: nil
     )
-
+    
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        ZStack {
+            VStack(spacing: 32) {
+                Spacer()
 
-            Image("AppLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 300, height: 100)
+                Image("AppLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 100)
 
-            Text("Fast and Secure Payments")
-                .font(.headline)
-                .foregroundColor(.gray)
+                Text("Fast and Secure Payments")
+                    .font(.headline)
+                    .foregroundColor(.gray)
 
-            VStack(spacing: 20) {
-                TextField("User Name", text: $userName)
-                    .autocapitalization(.none)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .onChange(of: userName) { newValue in
-                        LogDropLogger.shared.logInfo("Username updated: \(newValue)", logFlow: loginFlow)
-                    }
+                VStack(spacing: 20) {
+                    TextField("User Name", text: $userName)
+                        .autocapitalization(.none)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                        .onChange(of: userName) { newValue in
+                            LogDropLogger.shared.logInfo(
+                                "Username updated: \(newValue)",
+                                logFlow: loginFlow
+                            )
+                        }
 
-                SecureField("PIN Code (1234)", text: $pinCode)
-                    .keyboardType(.numberPad)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .onChange(of: pinCode) { newValue in
-                        // The "password" value here will be masked in logs
-                        // because of the SensitiveInfoFilter added in LogDropConfig
-                        LogDropLogger.shared.logInfo("PIN code updated: password=\(newValue)", logFlow: loginFlow)
-                    }
+                    SecureField("Password", text: $pinCode)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                        .onChange(of: pinCode) { newValue in
+                            LogDropLogger.shared.logInfo(
+                                "PIN code updated: password=\(newValue)",
+                                logFlow: loginFlow
+                            )
+                        }
+                }
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
+
+                Button(action: signIn) {
+                    Text("Sign In")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color("PrimaryColor"))
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+
+                Spacer()
             }
+            .padding(.horizontal, 24)
 
-            if showError {
-                Text("Invalid credentials")
-                    .foregroundColor(.red)
-                    .font(.footnote)
+            if isLoading {
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+
+                ProgressView()
+                    .scaleEffect(1.4)
             }
-
-            Button(action: signIn) {
-                Text("Sign In")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color("PrimaryColor"))
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-
-            Spacer()
         }
-        .padding(.horizontal, 24)
         .onAppear {
             LogDropLogger.shared.logInfo("Login screen opened")
 
-            if let saved: String = CacheManager.shared.get(forKey: kUsernameKey, type: String.self) {
+            if let saved: String = CacheManager.shared.get(
+                forKey: kUsernameKey,
+                type: String.self
+            ) {
                 userName = saved
-                LogDropLogger.shared.logInfo("Loaded saved username: \(saved)", logFlow: loginFlow)
+                LogDropLogger.shared.logInfo(
+                    "Loaded saved username: \(saved)",
+                    logFlow: loginFlow
+                )
             }
         }
     }
 
+    
     private func signIn() {
-        LogDropLogger.shared.logInfo("Sign in attempt for username: \(userName)", logFlow: loginFlow)
+        errorMessage = nil
+        isLoading = true
 
-        if pinCode == DummyData.pinCode {
-            showError = false
+        LogDropLogger.shared.logInfo(
+            "Sign in attempt for username: \(userName)",
+            logFlow: loginFlow
+        )
 
-            let cachedUser: String? = CacheManager.shared.get(forKey: kUsernameKey, type: String.self)
+        Task {
+            do {
+                let token = try await authService.login(
+                    username: userName,
+                    password: pinCode
+                )
 
-            if cachedUser != userName {
+                await MainActor.run {
+                    authManager.login(token: token)
+                    isLoading = false
+                }
+
+                Analytics.logEvent(AnalyticsEventLogin, parameters: [
+                    "username": userName
+                ])
+
                 CacheManager.shared.set(userName, forKey: kUsernameKey)
                 LogDrop.updateUser(userUuid: userName)
-                LogDropLogger.shared.logInfo("Sign in successful for username: \(userName)", logFlow: loginFlow)
-            } else {
-                LogDropLogger.shared.logInfo("Sign in successful (cached user reused): \(userName)", logFlow: loginFlow)
-            }
 
-            session.isLoggedIn = true
-        }
-        else {
-            showError = true
-            LogDropLogger.shared.logWarning("Sign in failed for username: \(userName)", logFlow: loginFlow)
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = "Invalid username or password"
+                }
+
+                LogDropLogger.shared.logWarning(
+                    "Backend login failed for username: \(userName)",
+                    logFlow: loginFlow
+                )
+            }
         }
     }
+
 }
 
 #Preview {
-    LoginView().environmentObject(SessionManager())
+    LoginView()
+        .environmentObject(AuthManager())
 }

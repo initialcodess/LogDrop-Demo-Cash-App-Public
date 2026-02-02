@@ -8,35 +8,49 @@
 
 import SwiftUI
 import LogDropSDK
+import Firebase
+import FirebaseCore
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
 
 @main
 struct LogDropDemoAppApp: App {
-    @StateObject private var session = SessionManager()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    @StateObject private var authManager = AuthManager()
 
     init() {
         let config = LogDropConfig.Builder()
-            .setBaseUrl("")
             .setApiKey("")
             .setLoggingEnabled(true)
-            .setCrashTrackingEnabled(true)
-            .setSensitiveInfoFilter(sensitiveInfoFilter: [
-                try! NSRegularExpression(pattern: "^cardNo:\\s(?:\\d{4}[-\\s]?){3}\\d{4}$"),
-                try! NSRegularExpression(pattern: "password=[^&\\s]+")
-            ])
             .build()
 
         LogDrop.initialize(with: config)
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            if session.isLoggedIn {
-                HomeView()
-                    .environmentObject(session)
-            } else {
-                LoginView()
-                    .environmentObject(session)
-            }
+            RootView()
+                .environmentObject(authManager)
+        }
+    }
+}
+
+
+struct RootView: View {
+    @EnvironmentObject var authManager: AuthManager
+
+    var body: some View {
+        if authManager.isAuthenticated {
+            HomeView()
+        } else {
+            LoginView()
         }
     }
 }
