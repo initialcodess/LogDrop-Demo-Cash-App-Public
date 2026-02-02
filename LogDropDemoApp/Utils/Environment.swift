@@ -11,7 +11,7 @@ struct Environment {
         case development
         case production
     }
-    
+
     static let current: EnvironmentType = {
         #if DEBUG
         return .development
@@ -19,14 +19,15 @@ struct Environment {
         return .production
         #endif
     }()
-    
+
     struct API {
         static var baseURL: String {
             switch Environment.current {
             case .development:
-                return "http://localhost:3000"
+                return "http://5.75.130.193:3005"
+                //return "http://localhost:3000"
             case .production:
-                return "https://api-production-url"
+                return "http://5.75.130.193:3005"
             }
         }
     }
