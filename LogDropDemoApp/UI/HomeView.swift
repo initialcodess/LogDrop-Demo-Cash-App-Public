@@ -10,7 +10,12 @@ import SwiftUI
 import LogDropSDK
 
 struct HomeView: View {
-    @EnvironmentObject var session: SessionManager
+    @EnvironmentObject var authManager: AuthManager
+
+    @State private var dashboard: DashboardResponse?
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+
 
     var body: some View {
         TabView {
@@ -27,7 +32,7 @@ struct HomeView: View {
                     }
 
                     Spacer()
-                    
+
                     Button(action: {
                         LogDropLogger.shared.logDebug("Settings button tapped")
                     }) {
@@ -39,20 +44,20 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("CURRENT ACCOUNT")
                                 .font(.caption)
                                 .foregroundColor(.gray)
-                            
-                            Text("$2,985.43")
+
+                            Text("$\(dashboard?.account.balance ?? "0")")
                                 .font(.system(size: 32, weight: .bold))
                                 .onAppear {
-                                    LogDropLogger.shared.logInfo("Balance displayed: $2,985.43")
+                                    LogDropLogger.shared.logInfo("Balance displayed: $\(dashboard?.account.balance ?? "0")")
                                 }
-                            
+
                             ZStack(alignment: .bottomLeading) {
                                 RoundedRectangle(cornerRadius: 16)
                                     .fill(LinearGradient(
@@ -61,14 +66,14 @@ struct HomeView: View {
                                         endPoint: .bottomTrailing
                                     ))
                                     .frame(height: 180)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("**** **** **** 2025")
+                                    Text(dashboard?.cards.first?.cardNumber ?? "**** **** **** ****")
                                         .foregroundColor(.white)
-                                    Text("Kvothe Rofthuss")
+                                    Text(dashboard?.cards.first?.cardHolder ?? "-")
                                         .foregroundColor(.white.opacity(0.8))
                                         .font(.caption)
-                                    Text("02/28")
+                                    Text(dashboard?.cards.first?.expiryDate ?? "--/--")
                                         .foregroundColor(.white.opacity(0.8))
                                         .font(.caption)
                                 }
@@ -84,7 +89,7 @@ struct HomeView: View {
                             )
                         }
                         .padding(.horizontal)
-                        
+
                         HStack {
                             HStack {
                                 Image(systemName: "creditcard.fill")
@@ -93,7 +98,7 @@ struct HomeView: View {
                                     Text("Current Account")
                                         .font(.subheadline)
                                         .bold()
-                                    Text("•••• 2025")
+                                    Text("\(dashboard?.account.accountNumber ?? "No account")")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
@@ -114,7 +119,7 @@ struct HomeView: View {
                         .cornerRadius(12)
                         .shadow(radius: 2)
                         .padding(.horizontal)
-                        
+
                         HStack {
                             Text("Transactions")
                                 .font(.headline)
@@ -129,40 +134,29 @@ struct HomeView: View {
                             .foregroundColor(.blue)
                         }
                         .padding(.horizontal)
-                        
+
                         VStack(spacing: 16) {
-                            TransactionRow(
-                                icon: "tray.full.fill",
-                                title: "LogDrop Subscription",
-                                type: "Expense",
-                                amount: "-$19.99",
-                                amountColor: .black
-                            )
-
-                            TransactionRow(
-                                icon: "dollarsign.circle.fill",
-                                title: "Salary",
-                                type: "Income",
-                                amount: "+$6,300.00",
-                                amountColor: .green
-                            )
-
-                            TransactionRow(
-                                icon: "wifi",
-                                title: "Internet",
-                                type: "Expense",
-                                amount: "-$29.99",
-                                amountColor: .black
-                            )
+                            ForEach(dashboard?.transactions.prefix(10) ?? [], id: \.id) { transaction in
+                                TransactionRow(
+                                    icon: transaction.type == "EXPENSE" ? "tray.full.fill" : "dollarsign.circle.fill",
+                                    title: transaction.title,
+                                    type: transaction.type,
+                                    amount: transaction.type == "EXPENSE"
+                                        ? "-$\(transaction.amount)"
+                                        : "+$\(transaction.amount)",
+                                    amountColor: transaction.type == "EXPENSE" ? .black : .green
+                                )
+                            }
                         }
                         .padding(.horizontal)
-                        
+
                     }
                     .padding(.top, 16)
                 }
             }
             .onAppear {
                 LogDropLogger.shared.logInfo("Home screen opened")
+                loadDashboard()
             }
             .tabItem {
                 Label("Home", systemImage: "house.fill")
@@ -178,20 +172,45 @@ struct HomeView: View {
 
             Button("Exit") {
                 LogDropLogger.shared.logWarning("Exit tapped, logging out")
-                session.isLoggedIn = false
+                authManager.logout()
             }
             .tabItem {
                 Label("Exit", systemImage: "questionmark.circle")
             }
         }
     }
-    
+
     private func simulateApiCall() {
         LogDropLogger.shared.logDebug("API request started: POST /v1/account/manage")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             LogDropLogger.shared.logError("API request failed: \(DummyData.failedApiResponse)")
         }
     }
+
+    private func loadDashboard() {
+        Task {
+            do {
+                let url = URL(string: "\(Environment.API.baseURL)/dashboard")!
+                let response: DashboardResponse = try await APIClient.shared.request(url: url)
+
+                await MainActor.run {
+                    self.dashboard = response
+                    self.isLoading = false
+                }
+
+                LogDropLogger.shared.logInfo("Dashboard data loaded successfully")
+
+            } catch {
+                await MainActor.run {
+                    self.isLoading = false
+                    self.errorMessage = "Dashboard could not be loaded"
+                }
+
+                LogDropLogger.shared.logError("Dashboard request failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
 }
 
 struct TransactionRow: View {
@@ -200,7 +219,7 @@ struct TransactionRow: View {
     var type: String
     var amount: String
     var amountColor: Color
-    
+
     var body: some View {
         HStack {
             Image(systemName: icon)

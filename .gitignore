@@ -18,3 +18,5 @@ Pods/
 *.hmap
 *.ipa
 *.dSYM
+
+LogDropDemoApp/GoogleService-Info.plist

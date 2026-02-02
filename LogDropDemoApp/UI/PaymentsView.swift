@@ -8,6 +8,7 @@
 
 import SwiftUI
 import LogDropSDK
+import Foundation
 
 struct PaymentsView: View {
     @State private var flowUuid: String = ""
@@ -15,22 +16,89 @@ struct PaymentsView: View {
     @State private var username = ""
     @State private var message = ""
     @State private var amount = ""
-    
+
+    @State private var balance: Double = 0.0
+    @State private var payableUsers: [PayableUser] = []
+    @State private var isLoading = false
+
+    @State private var errorMessage: String? = nil
+    @State private var isProcessing = false
+
+    @State private var showSuccessToast = false
+    @State private var toastMessage = ""
+
     private let sendFundsFlow = LogFlow(
         name: "SendFundsFlow",
         id: UUID().uuidString,
         customAttributes: nil
     )
-    
+
+    private func performTransfer() {
+        let amountInt = Int(amount) ?? 0
+        let transferData = TransferRequest(
+            amount: amountInt,
+            message: message
+        )
+
+        isProcessing = true
+        errorMessage = nil
+
+        LogDropLogger.shared.logInfo(
+            "Transfer request initiated for \(username) with amount \(amount)",
+            logFlow: sendFundsFlow
+        )
+        let url = URL(string: "\(Environment.API.baseURL)/transactions/transfer/\(username)")!
+
+        Task {
+            do {
+                let _: TransferResponse = try await APIClient.shared.request(
+                    url: url,
+                    method: "POST",
+                    body: transferData
+                )
+
+                await MainActor.run {
+                    isProcessing = false
+                    showSheet = false
+                    fetchDashboardData()
+                }
+
+                self.toastMessage = "Transfer to \(username) successful!"
+                    withAnimation {
+                        self.showSuccessToast = true
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation {
+                            self.showSuccessToast = false
+                        }
+                    }
+
+            } catch let error as BackendError {
+                await MainActor.run {
+                    self.errorMessage = error.message
+                    self.isProcessing = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isProcessing = false
+                }
+            }
+        }
+    }
+
+
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+        ZStack(alignment: .top) {
+            ScrollView {
                 HStack {
                     TextField("Set Flow UUID", text: $flowUuid)
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
-                    
+
                     /**
                      DEMO only:
                      This UI lets us set a global flow id for logs.
@@ -59,13 +127,12 @@ struct PaymentsView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
-                
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("ALL ACCOUNTS")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    
+
                     HStack {
                         Image(systemName: "creditcard.fill")
                             .resizable()
@@ -75,7 +142,7 @@ struct PaymentsView: View {
                             Text("All Accounts")
                                 .font(.subheadline)
                                 .bold()
-                            Text("$7,325.29")
+                            Text("$\(String(format: "%.2f", balance))")
                                 .font(.title2)
                                 .fontWeight(.bold)
                         }
@@ -86,7 +153,7 @@ struct PaymentsView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .padding(.horizontal)
-                
+
                 VStack(spacing: 0) {
                     Button(action: {
                         LogDropLogger.shared.logInfo("Send Funds tapped")
@@ -125,6 +192,7 @@ struct PaymentsView: View {
                                     .padding()
                                     .background(Color(.systemGray6))
                                     .cornerRadius(10)
+                                    .autocapitalization(.none)
                             }
 
                             TextField("Add a message", text: $message)
@@ -145,25 +213,47 @@ struct PaymentsView: View {
 
                             Spacer()
 
+                            if let error = errorMessage {
+                                HStack {
+                                    Image(systemName: "exclamationmark.circle.fill")
+                                    Text(error)
+                                }
+                                .font(.callout)
+                                .foregroundColor(.red)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(8)
+                            }
+
                             Button(action: {
                                 LogDropLogger.shared.logInfo(
-                                    "Send Funds confirmed → username=\(username), amount=\(amount), message=\(message)",
+                                    "Send button tapped by user",
                                     logFlow: sendFundsFlow
                                 )
-                                showSheet = false
-                                username = ""
-                                amount = ""
-                                message = ""
+                                performTransfer()
                             }) {
-                                Text("Send \(amount.isEmpty ? "$0.00" : "$\(amount)")")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
+                                if isProcessing {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Send \(amount.isEmpty ? "$0.00" : "$\(amount)")")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(12)
+                                }
                             }
+                            .disabled(isProcessing || username.isEmpty || amount.isEmpty)
                         }
                         .padding()
+                        .onDisappear {
+                            username = ""
+                            amount = ""
+                            message = ""
+                            errorMessage = nil
+                        }
                     }
 
                     Divider()
@@ -183,48 +273,96 @@ struct PaymentsView: View {
                 .cornerRadius(12)
                 .shadow(radius: 1)
                 .padding(.horizontal)
-                
+
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Pay Fast")
                         .font(.headline)
                         .padding(.horizontal)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            ForEach(DummyPayments.recentUsers, id: \.id) { user in
-                                VStack {
-                                    Circle()
-                                        .fill(Color("PrimaryColor"))
-                                        .frame(width: 56, height: 56)
-                                        .overlay(Text(String(user.name.prefix(1)))
-                                            .foregroundColor(.white)
-                                            .font(.headline))
-                                    Text(user.name)
-                                        .font(.caption)
-                                }
-                                .onTapGesture {
-                                    LogDropLogger.shared.logInfo("Pay Fast tapped for user: \(user.name)")
+
+                    if isLoading {
+                        ProgressView()
+                            .padding(.horizontal)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(payableUsers) { user in
+                                    VStack {
+                                        Circle()
+                                            .fill(Color("PrimaryColor"))
+                                            .frame(width: 56, height: 56)
+                                            .overlay(Text(String(user.username.prefix(1)).uppercased())
+                                                .foregroundColor(.white)
+                                                .font(.headline))
+                                        Text(user.username)
+                                            .font(.caption)
+                                    }
+                                    .onTapGesture {
+                                        LogDropLogger.shared.logInfo("Pay Fast tapped for user: \(user.username)")
+                                        self.username = user.username
+                                        self.showSheet = true
+                                    }
                                 }
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
                 }
+            }
+            .navigationTitle("Payments")
+
+            // MARK: Success Toast UI
+            if showSuccessToast {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                    Text(toastMessage)
+                        .foregroundColor(.white)
+                        .font(.subheadline)
+                        .bold()
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+                .background(Color.green)
+                .cornerRadius(25)
+                .shadow(radius: 4)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 10)
+                .zIndex(1)
             }
         }
         .navigationTitle("Payments")
         .onAppear {
             LogDropLogger.shared.logInfo("Payments screen opened")
+            fetchDashboardData()
+        }
+    }
+
+    private func fetchDashboardData() {
+        guard let url = URL(string: "\(Environment.API.baseURL)/payment/dashboard") else { return }
+
+        isLoading = true
+        Task {
+            do {
+                let response: PaymentDashboardResponse = try await APIClient.shared.request(url: url)
+                await MainActor.run {
+                    self.balance = response.balanceDouble
+                    self.payableUsers = response.payableUsers
+                    self.isLoading = false
+                }
+            } catch {
+                LogDropLogger.shared.logError("Failed to fetch dashboard: \(error.localizedDescription)")
+                await MainActor.run { self.isLoading = false }
+            }
         }
     }
 }
-
 
 struct PaymentActionRow: View {
     let icon: String
     let title: String
     let subtitle: String
     let color: Color
-    
+
     var body: some View {
         HStack {
             Image(systemName: icon)
@@ -241,21 +379,6 @@ struct PaymentActionRow: View {
         }
         .padding()
     }
-}
-
-struct DummyPayments {
-    struct User: Identifiable {
-        let id = UUID()
-        let name: String
-    }
-    
-    static let recentUsers = [
-        User(name: "Liam"),
-        User(name: "Olivia"),
-        User(name: "Noah"),
-        User(name: "Emma"),
-        User(name: "Mason")
-    ]
 }
 
 #Preview {
