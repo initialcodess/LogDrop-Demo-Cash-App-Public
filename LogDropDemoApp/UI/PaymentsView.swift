@@ -36,6 +36,7 @@ struct PaymentsView: View {
     private func performTransfer() {
         let amountInt = Int(amount) ?? 0
         let transferData = TransferRequest(
+            receiverUsername: username,
             amount: amountInt,
             message: message
         )
@@ -47,7 +48,7 @@ struct PaymentsView: View {
             "Transfer request initiated for \(username) with amount \(amount)",
             logFlow: sendFundsFlow
         )
-        let url = URL(string: "\(Environment.API.baseURL)/transactions/transfer/\(username)")!
+        let url = URL(string: "\(Environment.API.baseURL)/transactions/transfer")!
 
         Task {
             do {
