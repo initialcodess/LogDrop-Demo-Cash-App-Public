@@ -7,6 +7,7 @@
 
 
 struct TransferRequest: Encodable {
+    let receiverUsername: String
     let amount: Int
     let message: String
 }
