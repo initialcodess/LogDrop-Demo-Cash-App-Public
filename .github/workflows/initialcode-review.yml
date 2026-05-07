@@ -1,0 +1,31 @@
+name: InitialCode Review
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  review:
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '@initialcode review')) ||
+      (github.event_name == 'pull_request_review_comment' &&
+       contains(github.event.comment.body, '@initialcode review'))
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: initialcodess/codereviewer@v1
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          app-id: ${{ secrets.INITIALCODE_REVIEW_APP_ID }}
+          app-private-key: ${{ secrets.INITIALCODE_REVIEW_APP_PRIVATE_KEY }}
+          pr-number: ${{ github.event.issue.number || github.event.pull_request.number }}
