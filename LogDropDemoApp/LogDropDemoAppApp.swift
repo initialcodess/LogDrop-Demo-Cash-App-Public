@@ -27,7 +27,6 @@ struct LogDropDemoAppApp: App {
 
     init() {
         let config = LogDropConfig.Builder()
-            .setApiKey("")
             .setLoggingEnabled(true)
             .build()
 

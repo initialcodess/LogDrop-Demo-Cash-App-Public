@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CA2BA7702E4F37AD006C8DBB /* LogDropSDK in Frameworks */ = {isa = PBXBuildFile; productRef = CA2BA76F2E4F37AD006C8DBB /* LogDropSDK */; };
+		DCE50D082FACB565000E5E6E /* LogDropSDK in Frameworks */ = {isa = PBXBuildFile; productRef = DCE50D072FACB565000E5E6E /* LogDropSDK */; };
 		DCF964BA2F2A3FB700157BE9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DCF964B92F2A3FB700157BE9 /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCF964BA2F2A3FB700157BE9 /* FirebaseAnalytics in Frameworks */,
-				CA2BA7702E4F37AD006C8DBB /* LogDropSDK in Frameworks */,
+				DCE50D082FACB565000E5E6E /* LogDropSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,8 +86,8 @@
 			);
 			name = LogDropDemoApp;
 			packageProductDependencies = (
-				CA2BA76F2E4F37AD006C8DBB /* LogDropSDK */,
 				DCF964B92F2A3FB700157BE9 /* FirebaseAnalytics */,
+				DCE50D072FACB565000E5E6E /* LogDropSDK */,
 			);
 			productName = LogDropDemoApp;
 			productReference = CA2BA75D2E4F36C5006C8DBB /* LogDropDemoApp.app */;
@@ -118,8 +118,8 @@
 			mainGroup = CA2BA7542E4F36C5006C8DBB;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				CA2BA76E2E4F37AC006C8DBB /* XCRemoteSwiftPackageReference "LogDrop-iOS" */,
 				DCF964B82F2A3FB700157BE9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				DCE50D062FACB565000E5E6E /* XCRemoteSwiftPackageReference "LogDrop-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CA2BA75E2E4F36C5006C8DBB /* Products */;
@@ -393,12 +393,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CA2BA76E2E4F37AC006C8DBB /* XCRemoteSwiftPackageReference "LogDrop-iOS" */ = {
+		DCE50D062FACB565000E5E6E /* XCRemoteSwiftPackageReference "LogDrop-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/initialcodess/LogDrop-iOS";
 			requirement = {
 				kind = exactVersion;
-				version = 1.0.8;
+				version = "2.0.5-alpha2";
 			};
 		};
 		DCF964B82F2A3FB700157BE9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -412,9 +412,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CA2BA76F2E4F37AD006C8DBB /* LogDropSDK */ = {
+		DCE50D072FACB565000E5E6E /* LogDropSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CA2BA76E2E4F37AC006C8DBB /* XCRemoteSwiftPackageReference "LogDrop-iOS" */;
+			package = DCE50D062FACB565000E5E6E /* XCRemoteSwiftPackageReference "LogDrop-iOS" */;
 			productName = LogDropSDK;
 		};
 		DCF964B92F2A3FB700157BE9 /* FirebaseAnalytics */ = {
