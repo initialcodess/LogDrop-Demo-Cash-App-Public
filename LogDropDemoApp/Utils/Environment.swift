@@ -24,10 +24,9 @@ struct Environment {
         static var baseURL: String {
             switch Environment.current {
             case .development:
-                return "http://5.75.130.193:3005"
-                //return "http://localhost:3000"
+                return "https://cashapp-demo.logdrop.io"
             case .production:
-                return "http://5.75.130.193:3005"
+                return "https://cashapp-demo.logdrop.io"
             }
         }
     }

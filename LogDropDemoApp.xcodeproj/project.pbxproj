@@ -398,7 +398,7 @@
 			repositoryURL = "https://github.com/initialcodess/LogDrop-iOS";
 			requirement = {
 				kind = exactVersion;
-				version = "2.0.5-alpha2";
+				version = 2.0.8;
 			};
 		};
 		DCF964B82F2A3FB700157BE9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
