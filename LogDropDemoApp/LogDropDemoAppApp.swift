@@ -10,12 +10,30 @@ import SwiftUI
 import LogDropSDK
 import Firebase
 import FirebaseCore
+import UserNotifications
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
         FirebaseApp.configure()
+        UIApplication.shared.registerForRemoteNotifications()
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        LogDrop.onNewApnsToken(apnsToken: deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register: \(error)")
+    }
+
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        LogDrop.onRemoteMessageReceived(userInfo)
+        completionHandler(.newData)
     }
 }
 
@@ -26,12 +44,31 @@ struct LogDropDemoAppApp: App {
     @StateObject private var authManager = AuthManager()
 
     init() {
-        let config = LogDropConfig.Builder()
-            .setApiKey("")
+        var appId = ""
+        var baseUrl = ""
+        
+        if let path = Bundle.main.path(forResource: "LogDrop-Services", ofType: "plist"),
+           let dict = NSDictionary(contentsOfFile: path) as? [String: Any] {
+            baseUrl = dict["base_url"] as? String ?? ""
+            let projects = dict["projects"] as? [String: Any] ?? [:]
+            let bundleId = Bundle.main.bundleIdentifier ?? ""
+            if let projectDict = projects[bundleId] as? [String: Any],
+               let loadedAppId = projectDict["app_id"] as? String {
+                appId = loadedAppId
+            }
+        }
+        
+        let configBuilder = LogDropConfig.Builder()
             .setLoggingEnabled(true)
-            .build()
-
-        LogDrop.initialize(with: config)
+            
+        if !appId.isEmpty {
+            _ = configBuilder.setAppId(appId)
+        }
+        if !baseUrl.isEmpty {
+            _ = configBuilder.setBaseUrl(baseUrl)
+        }
+        
+        LogDrop.initialize(with: configBuilder.build())
     }
 
     var body: some Scene {
