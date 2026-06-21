@@ -162,7 +162,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export LOGDROP_BASE_URL=\"\"\nexport LOGDROP_API_KEY=\"\" \nSCRIPT=$(find \"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/LogDrop-iOS\" -name \"upload_dsym.sh\" | head -n 1)\n/bin/sh \"$SCRIPT\"\n";
+			shellScript = "export LOGDROP_BASE_URL=\"https://server.logdrop.io/api/\"\nexport LOGDROP_API_KEY=\"\" \nSCRIPT=$(find \"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/LogDrop-iOS\" -name \"upload_dsym.sh\" | head -n 1)\n/bin/sh \"$SCRIPT\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
