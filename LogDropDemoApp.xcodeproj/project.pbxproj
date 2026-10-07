@@ -9,10 +9,45 @@
 /* Begin PBXBuildFile section */
 		DCE50D082FACB565000E5E6E /* LogDropSDK in Frameworks */ = {isa = PBXBuildFile; productRef = DCE50D072FACB565000E5E6E /* LogDropSDK */; };
 		DCF964BA2F2A3FB700157BE9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DCF964B92F2A3FB700157BE9 /* FirebaseAnalytics */; };
+		85EE00012F00000000000001 /* LogDropNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 85EE00002F00000000000001 /* LogDropNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		85EE00022F00000000000001 /* LogDropSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 85EE00102F00000000000001 /* LogDropSDK */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		85EE00032F00000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA2BA7552E4F36C5006C8DBB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 85EE00082F00000000000001;
+			remoteInfo = LogDropNotificationServiceExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		85EE00042F00000000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				85EE00012F00000000000001 /* LogDropNotificationServiceExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		85EE000B2F00000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 85EE00082F00000000000001 /* LogDropNotificationServiceExtension */;
+			targetProxy = 85EE00032F00000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		CA2BA75D2E4F36C5006C8DBB /* LogDropDemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LogDropDemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		85EE00002F00000000000001 /* LogDropNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LogDropNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -23,6 +58,13 @@
 			);
 			target = CA2BA75C2E4F36C5006C8DBB /* LogDropDemoApp */;
 		};
+		85EE00052F00000000000001 /* Exceptions for "LogDropNotificationServiceExtension" folder in "LogDropNotificationServiceExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 85EE00082F00000000000001 /* LogDropNotificationServiceExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +74,14 @@
 				CA5C65542F310ADE00D4FE15 /* Exceptions for "LogDropDemoApp" folder in "LogDropDemoApp" target */,
 			);
 			path = LogDropDemoApp;
+			sourceTree = "<group>";
+		};
+		85EE00062F00000000000001 /* LogDropNotificationServiceExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				85EE00052F00000000000001 /* Exceptions for "LogDropNotificationServiceExtension" folder in "LogDropNotificationServiceExtension" target */,
+			);
+			path = LogDropNotificationServiceExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -46,6 +96,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		85EE00072F00000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85EE00022F00000000000001 /* LogDropSDK in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -53,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				CA2BA75F2E4F36C5006C8DBB /* LogDropDemoApp */,
+				85EE00062F00000000000001 /* LogDropNotificationServiceExtension */,
 				CA2BA75E2E4F36C5006C8DBB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				CA2BA75D2E4F36C5006C8DBB /* LogDropDemoApp.app */,
+				85EE00002F00000000000001 /* LogDropNotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -75,11 +135,13 @@
 				CA2BA7592E4F36C5006C8DBB /* Sources */,
 				CA2BA75A2E4F36C5006C8DBB /* Frameworks */,
 				CA2BA75B2E4F36C5006C8DBB /* Resources */,
+				85EE00042F00000000000001 /* Embed App Extensions */,
 				CA2BA7A02E5086AF006C8DBB /* LogDrop Dsym Upload Script */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				85EE000B2F00000000000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CA2BA75F2E4F36C5006C8DBB /* LogDropDemoApp */,
@@ -93,6 +155,29 @@
 			productReference = CA2BA75D2E4F36C5006C8DBB /* LogDropDemoApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		85EE00082F00000000000001 /* LogDropNotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85EE000D2F00000000000001 /* Build configuration list for PBXNativeTarget "LogDropNotificationServiceExtension" */;
+			buildPhases = (
+				85EE00092F00000000000001 /* Sources */,
+				85EE00072F00000000000001 /* Frameworks */,
+				85EE000A2F00000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				85EE00062F00000000000001 /* LogDropNotificationServiceExtension */,
+			);
+			name = LogDropNotificationServiceExtension;
+			packageProductDependencies = (
+				85EE00102F00000000000001 /* LogDropSDK */,
+			);
+			productName = LogDropNotificationServiceExtension;
+			productReference = 85EE00002F00000000000001 /* LogDropNotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -103,8 +188,18 @@
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					85EE00082F00000000000001 = {
+						CreatedOnToolsVersion = 16.2;
+						SystemCapabilities = { com.apple.ApplicationGroups.iOS = { enabled = 1; }; };
+					};
 					CA2BA75C2E4F36C5006C8DBB = {
 						CreatedOnToolsVersion = 16.2;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = { enabled = 1; };
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -127,12 +222,20 @@
 			projectRoot = "";
 			targets = (
 				CA2BA75C2E4F36C5006C8DBB /* LogDropDemoApp */,
+				85EE00082F00000000000001 /* LogDropNotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		CA2BA75B2E4F36C5006C8DBB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		85EE000A2F00000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -162,12 +265,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export LOGDROP_BASE_URL=\"https://server.logdrop.io/api/\"\nexport LOGDROP_API_KEY=\"\" \nSCRIPT=$(find \"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/LogDrop-iOS\" -name \"upload_dsym.sh\" | head -n 1)\n/bin/sh \"$SCRIPT\"\n";
+			shellScript = "export LOGDROP_BASE_URL=\"https://server.logdrop.io/api/\"\nexport LOGDROP_API_KEY=\"YOUR_API_KEY\"\nSCRIPT=$(find \"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/LogDrop-iOS\" -name \"upload_dsym.sh\" | head -n 1)\n/bin/sh \"$SCRIPT\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CA2BA7592E4F36C5006C8DBB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		85EE00092F00000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -302,6 +412,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = LogDropDemoApp/LogDropDemoApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"LogDropDemoApp/Preview Content\"";
@@ -339,6 +450,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = LogDropDemoApp/LogDropDemoApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LogDropDemoApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 83W27868XU;
@@ -369,6 +481,54 @@
 			};
 			name = Release;
 		};
+		85EE000E2F00000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LogDropNotificationServiceExtension/LogDropNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 83W27868XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LogDropNotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LogDropNotificationServiceExtension;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.initialcode.LogDropDemoApp.LogDropNotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		85EE000F2F00000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LogDropNotificationServiceExtension/LogDropNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 83W27868XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LogDropNotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LogDropNotificationServiceExtension;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.initialcode.LogDropDemoApp.LogDropNotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -390,6 +550,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		85EE000D2F00000000000001 /* Build configuration list for PBXNativeTarget "LogDropNotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85EE000E2F00000000000001 /* Debug */,
+				85EE000F2F00000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -398,7 +567,7 @@
 			repositoryURL = "https://github.com/initialcodess/LogDrop-iOS";
 			requirement = {
 				kind = exactVersion;
-				version = 2.0.8;
+				version = 2.1.9;
 			};
 		};
 		DCF964B82F2A3FB700157BE9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -421,6 +590,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DCF964B82F2A3FB700157BE9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
+		};
+		85EE00102F00000000000001 /* LogDropSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DCE50D062FACB565000E5E6E /* XCRemoteSwiftPackageReference "LogDrop-iOS" */;
+			productName = LogDropSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

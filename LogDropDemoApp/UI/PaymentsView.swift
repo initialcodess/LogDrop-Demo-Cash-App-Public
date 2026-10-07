@@ -11,6 +11,10 @@ import LogDropSDK
 import Foundation
 
 struct PaymentsView: View {
+    @ObservedObject private var router = CashAppRouter.shared
+    @State private var transferCompleted = false
+    @State private var entryPoint = "send_funds"
+    @State private var transferID = ""
     @State private var flowUuid: String = ""
     @State private var showSheet = false
     @State private var username = ""
@@ -34,7 +38,13 @@ struct PaymentsView: View {
     )
 
     private func performTransfer() {
-        let amountInt = Int(amount) ?? 0
+        guard let amountValue = Double(amount.replacingOccurrences(of: ",", with: ".")), amountValue.isFinite, amountValue > 0 else {
+            errorMessage = "Enter an amount greater than zero"
+            return
+        }
+        let amountInt = (amountValue * 100).rounded() / 100
+        let eventProperties: [String: Any] = ["amount": amountInt, "currency": "USD", "entry_point": entryPoint, "transfer_id": transferID]
+        LogDrop.trackCustomEvent(eventName: "transfer_submitted", properties: eventProperties)
         let transferData = TransferRequest(
             receiverUsername: username,
             amount: amountInt,
@@ -52,19 +62,22 @@ struct PaymentsView: View {
 
         Task {
             do {
-                let _: TransferResponse = try await APIClient.shared.request(
+                let response: TransferResponse = try await APIClient.shared.request(
                     url: url,
                     method: "POST",
                     body: transferData
                 )
 
+                guard response.success == true else { throw BackendError(message: "Transfer could not be completed") }
+                LogDrop.trackCustomEvent(eventName: "transfer_completed", properties: eventProperties)
                 await MainActor.run {
+                    transferCompleted = true
+                    toastMessage = "Transfer to \(username) successful!"
                     isProcessing = false
                     showSheet = false
                     fetchDashboardData()
                 }
 
-                self.toastMessage = "Transfer to \(username) successful!"
                     withAnimation {
                         self.showSuccessToast = true
                     }
@@ -76,11 +89,17 @@ struct PaymentsView: View {
                     }
 
             } catch let error as BackendError {
+                var failure = eventProperties
+                failure["reason_code"] = "transfer_rejected"
+                LogDrop.trackCustomEvent(eventName: "transfer_failed", properties: failure)
                 await MainActor.run {
                     self.errorMessage = error.message
                     self.isProcessing = false
                 }
             } catch {
+                var failure = eventProperties
+                failure["reason_code"] = "connection_error"
+                LogDrop.trackCustomEvent(eventName: "transfer_failed", properties: failure)
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                     self.isProcessing = false
@@ -158,7 +177,7 @@ struct PaymentsView: View {
                 VStack(spacing: 0) {
                     Button(action: {
                         LogDropLogger.shared.logInfo("Send Funds tapped")
-                        showSheet = true
+                        beginTransfer(source: "send_funds")
                     }) {
                         PaymentActionRow(
                             icon: "arrow.up.right.circle.fill",
@@ -178,6 +197,7 @@ struct PaymentsView: View {
                                         .font(.title2)
                                         .foregroundColor(.blue)
                                 }
+                                .disabled(isProcessing)
                                 Spacer()
                                 Text("Send Funds")
                                     .font(.title2).bold()
@@ -249,7 +269,11 @@ struct PaymentsView: View {
                             .disabled(isProcessing || username.isEmpty || amount.isEmpty)
                         }
                         .padding()
+                        .interactiveDismissDisabled(isProcessing)
                         .onDisappear {
+                            if !transferCompleted {
+                                LogDrop.trackCustomEvent(eventName: "transfer_cancelled", properties: ["entry_point": entryPoint, "currency": "USD", "transfer_id": transferID, "amount": Double(amount.replacingOccurrences(of: ",", with: ".")) ?? 0])
+                            }
                             username = ""
                             amount = ""
                             message = ""
@@ -257,6 +281,10 @@ struct PaymentsView: View {
                         }
                     }
 
+                    Divider()
+                    Button { router.openBills = true } label: {
+                        PaymentActionRow(icon: "doc.text.fill", title: "Pay a bill", subtitle: "Review your monthly electricity bill", color: Color("PrimaryColor"))
+                    }
                     Divider()
 
                     Button(action: {
@@ -300,7 +328,7 @@ struct PaymentsView: View {
                                     .onTapGesture {
                                         LogDropLogger.shared.logInfo("Pay Fast tapped for user: \(user.username)")
                                         self.username = user.username
-                                        self.showSheet = true
+                                        beginTransfer(source: "pay_fast")
                                     }
                                 }
                             }
@@ -332,10 +360,19 @@ struct PaymentsView: View {
             }
         }
         .navigationTitle("Payments")
+        .sheet(isPresented: $router.openBills) { CashBillView() }
         .onAppear {
             LogDropLogger.shared.logInfo("Payments screen opened")
             fetchDashboardData()
         }
+    }
+
+    private func beginTransfer(source: String) {
+        transferCompleted = false
+        entryPoint = source
+        transferID = UUID().uuidString
+        LogDrop.trackCustomEvent(eventName: "transfer_started", properties: ["entry_point": source, "currency": "USD", "transfer_id": transferID])
+        showSheet = true
     }
 
     private func fetchDashboardData() {

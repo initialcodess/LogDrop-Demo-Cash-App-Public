@@ -60,6 +60,8 @@ struct LogDropDemoAppApp: App {
         
         let configBuilder = LogDropConfig.Builder()
             .setLoggingEnabled(true)
+            .setPushAppGroupSuiteName("group.io.initialcode.LogDropDemoApp")
+            .setPushDeeplinkHandler(CashAppRouter.shared)
             
         if !appId.isEmpty {
             _ = configBuilder.setAppId(appId)
@@ -69,12 +71,20 @@ struct LogDropDemoAppApp: App {
         }
         
         LogDrop.initialize(with: configBuilder.build())
+        LogDrop.setPushCallbacks(CashAppRouter.shared)
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(authManager)
+                .onOpenURL { url in
+                    LogDrop.handleIncomingURL(url)
+                    CashAppRouter.shared.route(url)
+                }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    LogDrop.handleUserActivity(activity)
+                }
         }
     }
 }

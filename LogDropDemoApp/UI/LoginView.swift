@@ -137,6 +137,7 @@ struct LoginView: View {
 
                 CacheManager.shared.set(userName, forKey: kUsernameKey)
                 LogDrop.updateUser(userUuid: userName)
+                LogDrop.trackCustomEvent(eventName: "login_completed", properties: ["method": "password"])
 
             } catch {
                 await MainActor.run {

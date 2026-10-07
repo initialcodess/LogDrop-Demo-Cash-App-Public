@@ -7,5 +7,6 @@
 
 
 struct TransferResponse: Decodable {
-    let count: Int
+    let success: Bool?
+    let count: Int?
 }

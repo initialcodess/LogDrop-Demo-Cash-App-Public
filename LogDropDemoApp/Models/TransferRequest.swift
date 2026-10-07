@@ -8,6 +8,6 @@
 
 struct TransferRequest: Encodable {
     let receiverUsername: String
-    let amount: Int
+    let amount: Double
     let message: String
 }

@@ -12,18 +12,21 @@ import LogDropSDK
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
 
+    @ObservedObject private var router = CashAppRouter.shared
+    @State private var showProfile = false
+    @State private var showAddMoney = false
     @State private var dashboard: DashboardResponse?
     @State private var isLoading = true
     @State private var errorMessage: String?
 
 
     var body: some View {
-        TabView {
+        TabView(selection: $router.tab) {
             VStack(spacing: 0) {
                 HStack {
                     Button(action: {
                         LogDropLogger.shared.logInfo("User tapped on profile icon")
-                        fatalError("unexpected nil value while loading profile")
+                        showProfile = true
                     }) {
                         Image(systemName: "person.circle.fill")
                             .resizable()
@@ -35,6 +38,7 @@ struct HomeView: View {
 
                     Button(action: {
                         LogDropLogger.shared.logDebug("Settings button tapped")
+                        showProfile = true
                     }) {
                         Image(systemName: "gearshape.fill")
                             .resizable()
@@ -120,6 +124,11 @@ struct HomeView: View {
                         .shadow(radius: 2)
                         .padding(.horizontal)
 
+                        Button { showAddMoney = true } label: {
+                            PaymentActionRow(icon: "plus.circle.fill", title: "Add money", subtitle: "Top up your cash account", color: Color("PrimaryColor"))
+                        }
+                        .background(Color.white).cornerRadius(12).shadow(radius: 1).padding(.horizontal)
+
                         HStack {
                             Text("Transactions")
                                 .font(.headline)
@@ -160,7 +169,7 @@ struct HomeView: View {
             }
             .tabItem {
                 Label("Home", systemImage: "house.fill")
-            }
+            }.tag(0)
 
             PaymentsView()
                 .onAppear {
@@ -168,7 +177,10 @@ struct HomeView: View {
                 }
                 .tabItem {
                     Label("Payments", systemImage: "arrow.right.arrow.left")
-                }
+                }.tag(1)
+
+            CashOffersView()
+                .tabItem { Label("Offers", systemImage: "sparkles") }.tag(2)
 
             Button("Exit") {
                 LogDropLogger.shared.logWarning("Exit tapped, logging out")
@@ -176,7 +188,18 @@ struct HomeView: View {
             }
             .tabItem {
                 Label("Exit", systemImage: "questionmark.circle")
-            }
+            }.tag(3)
+        }
+        .tint(Color("PrimaryColor"))
+        .sheet(isPresented: $showProfile) { CashProfileView() }
+        .sheet(isPresented: $showAddMoney, onDismiss: { loadDashboard() }) { CashAddMoneyView() }
+        .task {
+            do {
+                let profile: CashProfile = try await APIClient.shared.request(url: URL(string: "\(Environment.API.baseURL)/demo/profile")!)
+                LogDrop.updateUser(userUuid: profile.username) { result in
+                    if case .success = result { profile.syncAttributes() }
+                }
+            } catch { LogDropLogger.shared.logWarning("Could not sync account preferences: \(error.localizedDescription)") }
         }
     }
 

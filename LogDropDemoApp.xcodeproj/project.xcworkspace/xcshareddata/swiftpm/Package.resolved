@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/initialcodess/LogDrop-iOS",
       "state" : {
-        "revision" : "7855f2fc43127702306050c2298455d5cdb9c277",
-        "version" : "2.0.8"
+        "revision" : "265e2b6fd30d609487152f12591d3e09a3ba6b8d",
+        "version" : "2.1.9"
       }
     },
     {
